@@ -8,6 +8,7 @@ export default function Card({ card, onDelete, busy }) {
           src={card.card_pic || "https://placehold.co/600x400?text=No+Image"}
           alt={card.card_name || "Card image"}
           className="card-image"
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
         />
       </div>
 
