@@ -7,26 +7,26 @@ export default function EditCard() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // State Management
-  const [initialData, setInitialData] = useState(null);
+  // State for the form fields
+  const [formData, setFormData] = useState({ card_name: "", card_pic: "" });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
-  // 1. Fetch the card data on mount
   useEffect(() => {
     async function loadCard() {
       try {
-        setLoading(true);
         const cards = await getCards();
-        // Since getCards fetches all, we find the specific one by ID
-        const cardToEdit = cards.find((c) => c._id === id || c.id === id);
+        const targetId = Number(id); // Convert for MySQL
+        const cardToEdit = cards.find((c) => c.id === targetId);
 
-        if (!cardToEdit) {
-          throw new Error("Card not found");
-        }
+        if (!cardToEdit) throw new Error("Card not found");
 
-        setInitialData(cardToEdit);
+        // Pre-fill the form with data from MySQL
+        setFormData({
+          card_name: cardToEdit.card_name,
+          card_pic: cardToEdit.card_pic
+        });
       } catch (err) {
         setError(err.message);
       } finally {
@@ -36,40 +36,38 @@ export default function EditCard() {
     loadCard();
   }, [id]);
 
-  // 2. Handle Form Submission
-  const handleSubmit = async (formData) => {
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent page reload
     try {
-      setIsSubmitting(true);
-      setError(null);
+      setBusy(true);
       await updateCard(id, formData);
-      navigate("/"); // Redirect to home or list page after success
+      navigate("/cards");
     } catch (err) {
       setError(err.message);
     } finally {
-      setIsSubmitting(false);
+      setBusy(false);
     }
   };
 
-  // UI States
-  if (loading) return <div className="status">Loading card data...</div>;
-  if (error) return <div className="error-message">Error: {error}</div>;
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <main className="form-container">
+    <main>
       <h1>Edit Card</h1>
-
-      {/* 3. Pass data and submission handler to CardForm */}
       <CardForm
+        values={formData}
+        onChange={handleChange}
         onSubmit={handleSubmit}
-        initialData={initialData}
-        isBusy={isSubmitting}
+        busy={busy}
+        error={error}
+        submitText="Save Changes"
       />
-
-      {isSubmitting && <p>Saving changes...</p>}
-
-      <button onClick={() => navigate(-1)} className="btn-cancel">
-        Back
-      </button>
     </main>
   );
 }

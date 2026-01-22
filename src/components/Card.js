@@ -17,7 +17,7 @@ export default function Card({ card, onDelete, busy }) {
 
         <div className="card-actions">
           {/* Guide says Edit route is /cards/:id/edit */}
-          <Link to={`/cards/${card.id}/edit`} className="btn btn-secondary">
+          <Link to={`/editcard/${card.id}`} className="btn btn-secondary">
             Edit
           </Link>
 

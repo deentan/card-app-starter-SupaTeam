@@ -32,7 +32,7 @@ export async function addCard(card) {
 }
 
 export async function updateCard(id, card) {
-  const res = await fetch(`${API_URL}/updatecard/${id}`, {
+  const res = await fetch(`${API_URL}/editcard/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(card),
