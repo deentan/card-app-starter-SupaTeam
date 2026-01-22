@@ -3,13 +3,73 @@ import Card from "../components/Card";
 import { getCards, deleteCard } from "../services/api";
 
 export default function CardList() {
-  /* TODO: Complete the CardList page
-    - display a list of cards (use the Card component to display each card)
-    - delete button calling handleDelete with the card object
-    - handle loading, busy, and error states
-    - style as a grid UI */
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true); // fetching list
+  const [busyId, setBusyId] = useState(null);   // which card is being deleted
+  const [error, setError] = useState("");       // show meaningful errors
 
-  return <main>
-    <h1>CardList page</h1>
-  </main>;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setError("");
+        setLoading(true);
+        const data = await getCards();
+        setCards(data);
+      } catch (err) {
+        setError(err?.message || "Failed to load cards");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  const handleDelete = async (id) => {
+    const ok = window.confirm("Delete this card?");
+    if (!ok) return;
+
+    try {
+      setError("");
+      setBusyId(id);
+      await deleteCard(id);
+      // remove from UI immediately after successful delete
+      setCards((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      setError(err?.message || "Failed to delete card");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <main className="page">
+      <h1 className="page-title">All Cards</h1>
+
+      {loading && <p>Loading cards...</p>}
+
+      {!loading && error && (
+        <div className="error-banner">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && cards.length === 0 && (
+        <p>No cards found.</p>
+      )}
+
+      {!loading && cards.length > 0 && (
+        <section className="card-grid">
+          {cards.map((card) => (
+            <Card
+              key={card.id}
+              card={card}
+              onDelete={handleDelete}
+              busy={busyId === card.id}
+            />
+          ))}
+        </section>
+      )}
+    </main>
+  );
 }
