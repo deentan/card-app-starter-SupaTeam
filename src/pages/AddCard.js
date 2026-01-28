@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CardForm from "../components/CardForm";
 import { addCard } from "../services/api";
@@ -44,6 +44,10 @@ export default function AddCard() {
       setBusy(false);
     }
   };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/login");
+  }, [navigate]);
 
   return (
     <main className="form-page">
@@ -64,10 +68,11 @@ export default function AddCard() {
           className="btn-link"
           onClick={() => navigate("/cards")}
           disabled={busy}
+
         >
           Cancel and Go Back
         </button>
       </div>
-    </main>
+    </main >
   );
 }

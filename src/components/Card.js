@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Card({ card, onDelete, busy }) {
+export default function Card({ card, onDelete, busy, isAdmin }) {
   return (
     <div className="card">
       <div className="card-image-container">

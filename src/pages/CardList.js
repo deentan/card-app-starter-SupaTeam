@@ -4,9 +4,13 @@ import { getCards, deleteCard } from "../services/api";
 
 export default function CardList() {
   const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(true); // fetching list
-  const [busyId, setBusyId] = useState(null);   // which card is being deleted
-  const [error, setError] = useState("");       // show meaningful errors
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null);
+  const [error, setError] = useState("");
+
+  // Check role
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
 
   useEffect(() => {
     const load = async () => {
@@ -26,6 +30,13 @@ export default function CardList() {
   }, []);
 
   const handleDelete = async (id) => {
+    // Check for auth token first
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to delete a card!");
+      return;
+    }
+
     const ok = window.confirm("Delete this card?");
     if (!ok) return;
 
@@ -33,7 +44,6 @@ export default function CardList() {
       setError("");
       setBusyId(id);
       await deleteCard(id);
-      // remove from UI immediately after successful delete
       setCards((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       setError(err?.message || "Failed to delete card");
@@ -66,6 +76,7 @@ export default function CardList() {
               card={card}
               onDelete={handleDelete}
               busy={busyId === card.id}
+              isAdmin={isAdmin}
             />
           ))}
         </section>

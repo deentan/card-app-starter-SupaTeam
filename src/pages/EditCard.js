@@ -14,6 +14,14 @@ export default function EditCard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // 1. Check if user has a token
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to edit a card!");
+      navigate("/login");
+      return; // Stop execution
+    }
+
     async function loadCard() {
       try {
         const cards = await getCards();
@@ -34,7 +42,7 @@ export default function EditCard() {
       }
     }
     loadCard();
-  }, [id]);
+  }, [id, navigate]);
 
   // Handle input changes
   const handleChange = (e) => {
